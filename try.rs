@@ -123,6 +123,7 @@ enum SelectorMode {
 
 struct TrySelector {
     mode: SelectorMode,
+    workspace_path: PathBuf,
     input_buffer: String,
     cursor_pos: usize,
     scroll_offset: usize,
@@ -135,10 +136,11 @@ struct TrySelector {
 }
 
 impl TrySelector {
-    fn new(mode: SelectorMode, search_term: String) -> Self {
+    fn new(mode: SelectorMode, search_term: String, workspace_path: PathBuf) -> Self {
         let (w, h) = terminal::size().unwrap_or((80, 24));
         Self {
             mode,
+            workspace_path,
             input_buffer: search_term.clone().replace(" ", "-"),
             cursor_pos: 0,
             scroll_offset: 0,
@@ -412,6 +414,13 @@ impl TrySelector {
         stderr.queue(SetForegroundColor(Color::Red))?; // Orange-ish
         stderr.queue(SetAttribute(Attribute::Bold))?;
         stderr.queue(Print("📁 Try Selector"))?;
+        
+        // Show workspace path
+        stderr.queue(SetForegroundColor(Color::DarkGrey))?;
+        stderr.queue(Print(" @ "))?;
+        stderr.queue(SetForegroundColor(Color::Cyan))?;
+        stderr.queue(Print(self.workspace_path.display().to_string()))?;
+
         stderr.queue(SetAttribute(Attribute::Reset))?;
         stderr.queue(Clear(ClearType::UntilNewLine))?; // Clear rest of line
         stderr.queue(Print("\r\n"))?;
@@ -773,7 +782,7 @@ fn main() -> Result<()> {
         },
         Some(Commands::Set) => {
             let workspaces = WorkspaceManager::get_workspaces().unwrap_or_default();
-            run_interactive(SelectorMode::History(workspaces), String::new())?;
+            run_interactive(SelectorMode::History(workspaces), String::new(), base_path)?;
         },
         None => {
             // Default: try [query] -> mapped to try exec cd [query] by the shell wrapper
@@ -786,7 +795,7 @@ fn main() -> Result<()> {
             } else {
                  // The wrapper usually calls `try exec ...`. 
                  // If we are here, we should output the script for the wrapper to eval.
-                 run_interactive(SelectorMode::Scan(base_path), query_str)?;
+                 run_interactive(SelectorMode::Scan(base_path.clone()), query_str, base_path)?;
             }
         }
     }
@@ -794,8 +803,8 @@ fn main() -> Result<()> {
     Ok(())
 }
 
-fn run_interactive(mode: SelectorMode, query: String) -> Result<()> {
-    let mut selector = TrySelector::new(mode, query);
+fn run_interactive(mode: SelectorMode, query: String, workspace_path: PathBuf) -> Result<()> {
+    let mut selector = TrySelector::new(mode, query, workspace_path);
     if let Some(action) = selector.run()? {
         match action {
             ShellAction::Cd(path) => {
