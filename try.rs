@@ -48,7 +48,7 @@ impl WorkspaceManager {
             writeln!(file, "{}", ws.to_string_lossy())?;
         }
         
-        eprintln!("# Workspace saved to: {}", config_path.display());
+        // eprintln!("# Workspace saved to: {}", config_path.display());
         Ok(())
     }
 
@@ -544,7 +544,7 @@ impl TrySelector {
                      stderr.queue(SetAttribute(Attribute::Bold))?;
                 }
                 let date_suffix = Local::now().format("%Y-%m-%d").to_string();
-                stderr.queue(Print(format!("📂 Create new: {}-{}", self.input_buffer, date_suffix)))?;
+                stderr.queue(Print(format!("✨ Create new: {}-{}", self.input_buffer, date_suffix)))?;
                 stderr.queue(SetAttribute(Attribute::Reset))?;
             }
 
