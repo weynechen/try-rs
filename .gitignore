@@ -1,0 +1,77 @@
+# Compiled binaries
+**/target/
+
+# Rust analyzer cache
+**/.rust-analyzer/
+
+# Cargo lock (optional, uncomment if you want to ignore it)
+# Cargo.lock
+
+# Cargo home (local cargo configuration)
+**/.cargo/
+
+# Generated documentation
+**/doc/
+**/*.html
+**/*.pdf
+
+# Editor/IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+*.bak
+*.tmp
+
+# Test artifacts
+**/tests/**/target/
+**/test-results/
+
+# Benchmark results
+**/bench-results/
+
+# Build scripts output
+**/build/
+**/out/
+
+# Environment variables file
+.env
+.env.local
+.env.*.local
+
+# Log files
+**/*.log
+**/logs/
+
+# Profiling data
+**/*.prof
+**/profiles/
+
+# Temporary files
+**/tmp/
+**/temp/
+
+# Rustup related files
+**/.rustup/
+
+# Cargo bin directory (if using cargo install --path)
+**/bin/
+
+# WASM build artifacts
+**/*.wasm
+**/wasm/
+
+# LLVM artifacts
+**/*.ll
+**/*.bc
+
+# Coverage reports
+**/coverage/
+**/*.gcno
+**/*.gcda
+**/*.gcov
+
+# Dependency directories (if using vendored dependencies)
+**/vendor/
