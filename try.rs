@@ -781,7 +781,16 @@ fn main() -> Result<()> {
             generate_worktree_script(&base_path, &name, base)?;
         },
         Some(Commands::Set) => {
-            let workspaces = WorkspaceManager::get_workspaces().unwrap_or_default();
+            let mut workspaces = WorkspaceManager::get_workspaces().unwrap_or_default();
+            
+            // Get current working directory and add it to the front
+            if let Ok(cwd) = env::current_dir() {
+                // Remove current dir if it already exists in history
+                workspaces.retain(|p| p != &cwd);
+                // Insert current dir at the beginning
+                workspaces.insert(0, cwd);
+            }
+            
             run_interactive(SelectorMode::History(workspaces), String::new(), base_path)?;
         },
         None => {
@@ -821,10 +830,12 @@ fn run_interactive(mode: SelectorMode, query: String, workspace_path: PathBuf) -
                 ]);
             }
             ShellAction::Set(path) => {
-                // Export TRY_PATH and switch there maybe? Usually just set TRY_PATH.
-                // Or maybe cd to it as well? Let's just set variable for now.
-                println!("export TRY_PATH='{}'", path.display());
-                // Also update history to put this one at top?
+                // Set TRY_PATH and cd to the directory
+                emit_script(vec![
+                    format!("export TRY_PATH='{}'", path.display()),
+                    format!("cd '{}'", path.display())
+                ]);
+                // Update workspace history
                 let _ = WorkspaceManager::add_workspace(&path);
             }
         }
