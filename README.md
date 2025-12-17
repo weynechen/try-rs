@@ -10,8 +10,8 @@ It features a fast TUI, fuzzy searching, Git integration, and multi-workspace ma
 *   **⚡ Fast TUI**: Interactive interface built with `crossterm`.
 *   **🔍 Fuzzy Search**: Quickly find existing experiments or create new ones.
 *   **📅 Auto-Dating**: Directories are automatically suffixed with the date (e.g., `my-experiment-2025-12-16`).
-*   **📦 Git Integration**: Easily clone repos or create worktrees into isolated directories.
-*   **🗂️ Workspace Management**: Switch between different root directories (workspaces) using `try set`.
+*   **📦 Git Integration**: Easily clone repos or create worktrees into isolated directories, with proxy support.
+*   **🗂️ Workspace Management**: Switch between different root directories (workspaces) using `try set`, with current directory prioritized.
 
 ## Installation
 
@@ -80,6 +80,19 @@ try clone https://github.com/user/repo.git
 
 This creates `repo-YYYY-MM-DD` and clones the source into it.
 
+**Proxy Support**: If you need to use a proxy tool (like `proxychains` or similar) for cloning:
+
+```bash
+# Use --proxy option
+try clone https://github.com/user/repo.git --proxy proxychains
+
+# Or set TRY_PROXY environment variable
+export TRY_PROXY=proxychains
+try clone https://github.com/user/repo.git
+```
+
+The CLI option takes precedence over the environment variable.
+
 ### Git Worktrees
 
 If you are inside a Git repository, you can create a detached worktree for experiments:
@@ -104,7 +117,11 @@ try worktree feature-x
     ```bash
     try set
     ```
-    This opens a TUI listing your workspace history. Selecting one will update your `TRY_PATH`.
+    This opens a TUI listing your workspace history, with the **current working directory prioritized at the top**. 
+    Selecting a workspace will:
+    - Update your `TRY_PATH` environment variable
+    - Change to the selected directory (`cd`)
+    - Save it to your workspace history
 
 ## Configuration
 

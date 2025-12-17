@@ -96,6 +96,8 @@ enum Commands {
     Clone {
         url: String,
         name: Option<String>,
+        #[arg(short, long)]
+        proxy: Option<String>,
     },
     /// Create worktree in dated directory
     Worktree {
@@ -774,8 +776,8 @@ fn main() -> Result<()> {
             }
             print_init_script(&path);
         },
-        Some(Commands::Clone { url, name }) => {
-            generate_clone_script(&base_path, &url, name)?;
+        Some(Commands::Clone { url, name, proxy }) => {
+            generate_clone_script(&base_path, &url, name, proxy)?;
         },
         Some(Commands::Worktree { name, base }) => {
             generate_worktree_script(&base_path, &name, base)?;
@@ -800,7 +802,7 @@ fn main() -> Result<()> {
             
             // Check if query looks like a git url
             if query_str.starts_with("http") || query_str.starts_with("git@") {
-                 generate_clone_script(&base_path, &query_str, None)?;
+                 generate_clone_script(&base_path, &query_str, None, None)?;
             } else {
                  // The wrapper usually calls `try exec ...`. 
                  // If we are here, we should output the script for the wrapper to eval.
@@ -873,7 +875,7 @@ fn emit_script(cmds: Vec<String>) {
     println!("{}", joined);
 }
 
-fn generate_clone_script(base_path: &Path, url: &str, name: Option<String>) -> Result<()> {
+fn generate_clone_script(base_path: &Path, url: &str, name: Option<String>, proxy: Option<String>) -> Result<()> {
     let dir_name = if let Some(n) = name {
         n
     } else {
@@ -889,10 +891,19 @@ fn generate_clone_script(base_path: &Path, url: &str, name: Option<String>) -> R
     
     let full_path = base_path.join(&dir_name);
     
+    // Determine proxy command: CLI option > environment variable
+    let proxy_cmd = proxy.or_else(|| env::var("TRY_PROXY").ok());
+    
+    let clone_cmd = if let Some(proxy_tool) = proxy_cmd {
+        format!("{} git clone '{}' '{}'", proxy_tool, url, full_path.display())
+    } else {
+        format!("git clone '{}' '{}'", url, full_path.display())
+    };
+    
     emit_script(vec![
         format!("mkdir -p '{}'", full_path.display()),
         format!("echo 'Cloning {}...'", url),
-        format!("git clone '{}' '{}'", url, full_path.display()),
+        clone_cmd,
         format!("cd '{}'", full_path.display())
     ]);
     
