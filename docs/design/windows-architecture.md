@@ -98,9 +98,6 @@ pub trait ScriptGenerator: Send + Sync {
     /// 生成 git clone 命令
     fn generate_git_clone(&self, url: &str, dest: &PathBuf, proxy: Option<&str>) -> String;
 
-    /// 生成 git worktree 命令
-    fn generate_git_worktree(&self, dest: &PathBuf, base: Option<&PathBuf>) -> String;
-
     /// 转义路径
     fn escape_path(&self, path: &PathBuf) -> String;
 }
@@ -136,13 +133,6 @@ pub enum UserAction {
         url: String,
         dest: PathBuf,
         proxy: Option<String>,
-    },
-
-    /// Git worktree
-    Worktree {
-        name: String,
-        dest: PathBuf,
-        base: Option<PathBuf>,
     },
 }
 
@@ -368,22 +358,6 @@ impl ScriptGenerator for PowerShellGenerator {
         ])
     }
 
-    fn generate_git_worktree(&self, dest: &PathBuf, base: Option<&PathBuf>) -> String {
-        let check_git = format!(
-            "if (git rev-parse --is-inside-work-tree 2>$null) {{ $repo = git rev-parse --show-toplevel; git -C $repo worktree add --detach '{}' }}",
-            self.escape_path(dest)
-        );
-
-        self.generate_sequence(vec![
-            format!(
-                "New-Item -ItemType Directory -Path '{}' -Force | Out-Null",
-                self.escape_path(dest)
-            ),
-            check_git,
-            self.generate_cd(dest),
-        ])
-    }
-
     fn escape_path(&self, path: &PathBuf) -> String {
         // Windows 路径转义：反斜杠替换为正斜杠，单引号转义为 ''
         let path_str = path.display().to_string();
@@ -530,9 +504,6 @@ fn run_interactive(
             }
             UserAction::Clone { url, dest, proxy } => {
                 generator.generate_git_clone(&url, &dest, proxy.as_deref())
-            }
-            UserAction::Worktree { name, dest, base } => {
-                generator.generate_git_worktree(&dest, base.as_ref())
             }
         };
 

@@ -129,12 +129,6 @@ enum Commands {
         #[arg(short, long)]
         proxy: Option<String>,
     },
-    /// Create worktree in dated directory
-    Worktree {
-        name: String,
-        #[arg(short, long)]
-        base: Option<String>,
-    },
     /// Select a workspace from history
     Set,
 }
@@ -913,9 +907,6 @@ fn main() -> Result<()> {
         Some(Commands::Clone { url, name, proxy }) => {
             generate_clone_script(&base_path, &url, name, proxy)?;
         }
-        Some(Commands::Worktree { name, base }) => {
-            generate_worktree_script(&base_path, &name, base)?;
-        }
         Some(Commands::Set) => {
             let workspaces = WorkspaceManager::get_workspaces().unwrap_or_default();
 
@@ -1038,30 +1029,6 @@ fn generate_clone_script(
         format!("mkdir -p '{}'", full_path.display()),
         format!("echo 'Cloning {}...'", url),
         clone_cmd,
-        format!("cd '{}'", full_path.display()),
-    ]);
-
-    Ok(())
-}
-
-fn generate_worktree_script(base_path: &Path, name: &str, _base: Option<String>) -> Result<()> {
-    // Simplified worktree logic
-    let date_suffix = today_suffix();
-    let dir_name = format!("{}-{}", name, date_suffix);
-    let full_path = base_path.join(dir_name);
-
-    // Check if inside git repo happens in shell script usually, but we can generate the command
-    let cmd = format!(
-        "if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then \
-            repo=$(git rev-parse --show-toplevel); \
-            git -C \"$repo\" worktree add --detach '{}'; \
-         fi",
-        full_path.display()
-    );
-
-    emit_script(vec![
-        format!("mkdir -p '{}'", full_path.display()),
-        cmd,
         format!("cd '{}'", full_path.display()),
     ]);
 
