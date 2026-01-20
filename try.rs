@@ -264,13 +264,13 @@ impl TrySelector {
                             KeyCode::Up => {
                                 needs_redraw = self.cursor_up();
                             }
-                            KeyCode::Char('j') if key.modifiers.contains(KeyModifiers::CONTROL) => {
+                            KeyCode::Char('k') if key.modifiers.contains(KeyModifiers::CONTROL) => {
                                 needs_redraw = self.cursor_up();
                             }
                             KeyCode::Down => {
                                 needs_redraw = self.cursor_down();
                             }
-                            KeyCode::Char('k') if key.modifiers.contains(KeyModifiers::CONTROL) => {
+                            KeyCode::Char('j') if key.modifiers.contains(KeyModifiers::CONTROL) => {
                                 needs_redraw = self.cursor_down();
                             }
                             KeyCode::Backspace => {
