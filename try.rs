@@ -28,7 +28,8 @@ fn git_url_regex() -> &'static Regex {
     RE.get_or_init(|| Regex::new(r"([^/]+?)(\.git)?$").unwrap())
 }
 
-const VERSION: &str = "0.1.0";
+// Keep the CLI version in sync with Cargo.toml's [package] version.
+const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 fn today_suffix() -> String {
     Local::now().format("%Y-%m-%d").to_string()
