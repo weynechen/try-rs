@@ -1,6 +1,8 @@
 
 # try-rs
 
+> 中文文档请见 [docs/README_CN.md](docs/README_CN.md)。
+
 **try-rs** is a Rust port of the popular [try](https://github.com/tobi/try) tool. It is a command-line utility designed to help you easily manage and navigate temporary "sandbox" directories for experiments, keeping your main projects clean.
 
 It features a fast TUI, fuzzy searching, Git integration, and multi-workspace management.
@@ -9,9 +11,11 @@ It features a fast TUI, fuzzy searching, Git integration, and multi-workspace ma
 
 *   **⚡ Fast TUI**: Interactive interface built with `crossterm`.
 *   **🔍 Fuzzy Search**: Quickly find existing experiments or create new ones.
-*   **📅 Auto-Dating**: Directories are automatically suffixed with the date (e.g., `my-experiment-2025-12-16`).
-*   **📦 Git Integration**: Easily clone repos into isolated directories, with proxy support.
+*   **📅 Date Suffix**: Directory names are automatically suffixed with the date (e.g., `my-experiment-2025-12-16`), so experiments stay sorted and easy to tell apart over time.
+*   **🌐 Proxy Support**: Clone through a proxy tool (e.g. `proxychains`) via the `--proxy` option or the `TRY_PROXY` environment variable — handy when GitHub is slow or blocked.
+*   **📦 Git Integration**: Easily clone repos into isolated, dated directories.
 *   **🗂️ Workspace Management**: Switch between different root directories (workspaces) using `try set`, with current directory prioritized.
+*   **🪟 Cross-Platform**: Works on Linux, macOS, and Windows. The shell is auto-detected and the right script (Bash/Zsh or PowerShell) is emitted automatically.
 
 ## Installation
 
