@@ -1048,12 +1048,17 @@ struct BashGenerator;
 
 impl ScriptGenerator for BashGenerator {
     fn escape(&self, path: &Path) -> String {
-        // Normalize separators to '/' (accepted everywhere we target, and
-        // avoids backslashes that would break under Git Bash), then
+        let s = path.to_string_lossy();
+        // On Windows (Git Bash), normalize mixed separators to '/' so paths
+        // joined by PathBuf don't break `cd`. On real Unix, a backslash is a
+        // legal filename character and must be left untouched.
+        let s = if cfg!(windows) {
+            s.replace('\\', "/")
+        } else {
+            s.into_owned()
+        };
         // single-quote escape: ' -> '\''
-        path.to_string_lossy()
-            .replace('\\', "/")
-            .replace('\'', "'\\''")
+        s.replace('\'', "'\\''")
     }
 
     fn cd(&self, path: &Path) -> String {
@@ -1464,7 +1469,13 @@ mod tests {
     #[test]
     fn bash_escape_normalizes_backslashes() {
         let g = BashGenerator;
-        assert_eq!(g.escape(Path::new(r"C:\a\b")), "C:/a/b");
+        if cfg!(windows) {
+            // Git Bash: mixed separators normalized to '/'.
+            assert_eq!(g.escape(Path::new(r"C:\a\b")), "C:/a/b");
+        } else {
+            // Unix: backslash is a legal filename char, left untouched.
+            assert_eq!(g.escape(Path::new(r"C:\a\b")), r"C:\a\b");
+        }
     }
 
     #[test]
